@@ -682,6 +682,57 @@
   </script>
 </section>
 
+{% comment %} <script src=" https://cdn.jsdelivr.net/npm/vanillajs@1.0.1/dest/cjs/index.min.js "></script> {% endcomment %}
+<script>
+  console.log("test");
+  var variantRadios = document.querySelectorAll('variant-radios input[name="Color"]');
+  console.log("variantRadios = ", variantRadios);
+
+  variantRadios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      console.log('changed', radio.value);
+      document.querySelector('variant-selects select[name="options[Color]"]').value = radio.value
+    });
+  });
+
+  (function (ns, fetch) {
+    ns.fetch = function() {
+      const response = fetch.apply(this, arguments);
+      response.then(res => {
+        if (`${window.location.origin}/cart/add.js`
+          .includes(res.url)) {
+            res.json().then(data => {
+              console.log(data)
+              if(data.variant_title == "Black / Medium") {
+                var data = {
+                  quantity: 1,
+                  id: 41723456421935,
+                };
+
+                // Make a POST request using the fetch API
+                fetch('/cart/add.js', {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json'
+                  },
+                  body: JSON.stringify(data)
+                })
+                  .then(response => response.json())
+                  .then(data => {
+                    console.log('Item added to cart:', data);
+                  })
+                  .catch(error => {
+                    console.error('Error adding item to cart:', error);
+                  });
+              }
+            })
+        }
+      });
+      return response
+    }
+  }(window, window.fetch));
+
+</script>
 {% schema %}
 {
   "name": "t:sections.main-product.name",
