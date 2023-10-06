@@ -9,7 +9,6 @@
   Usage:
   {% render 'product-variant-picker', product: product, block: block, product_form_id: product_form_id %}
 {% endcomment %}
-
 {%- unless product.has_only_default_variant -%}
   <variant-radios class="no-js-hidden" data-section="{{ section.id }}" data-url="{{ product.url }}" {{ block.shopify_attributes }}>
     {%- for option in product.options_with_values -%}
@@ -22,8 +21,8 @@
                   form="{{ product_form_id }}"
                   {% if option.selected_value == value %}checked{% endif %}
             >
-            <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}">
-              {{ value }}
+            <label for="{{ section.id }}-{{ option.position }}-{{ forloop.index0 }}" >
+            <img src="{{product.media[forloop.index0].src | img_url: 'medium' }}" alt="color {{value}}">
             </label>
           {%- endfor -%}
         </fieldset>

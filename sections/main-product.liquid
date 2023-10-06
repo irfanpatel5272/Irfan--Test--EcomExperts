@@ -682,56 +682,49 @@
   </script>
 </section>
 
-{% comment %} <script src=" https://cdn.jsdelivr.net/npm/vanillajs@1.0.1/dest/cjs/index.min.js "></script> {% endcomment %}
 <script>
-  console.log("test");
-  var variantRadios = document.querySelectorAll('variant-radios input[name="Color"]');
-  console.log("variantRadios = ", variantRadios);
+  // set size as Unselected on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('select[name="options[Size]"]').value = "Unselected";
+    var sizeRadioElement = document.querySelector('input[name="Size"][value="Unselected"]');
+    if (sizeRadioElement) {
+      sizeRadioElement.checked = true;
+      var clickEvent = new MouseEvent('change', {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      sizeRadioElement.dispatchEvent(clickEvent);
+    }
+  });
 
+  // Update color(select) value of select on change of radio
+  var variantRadios = document.querySelectorAll('variant-radios input[name="Color"]');
   variantRadios.forEach(function(radio) {
     radio.addEventListener('change', function() {
-      console.log('changed', radio.value);
       document.querySelector('variant-selects select[name="options[Color]"]').value = radio.value
     });
   });
 
-  (function (ns, fetch) {
-    ns.fetch = function() {
-      const response = fetch.apply(this, arguments);
-      response.then(res => {
-        if (`${window.location.origin}/cart/add.js`
-          .includes(res.url)) {
-            res.json().then(data => {
-              console.log(data)
-              if(data.variant_title == "Black / Medium") {
-                var data = {
-                  quantity: 1,
-                  id: 41723456421935,
-                };
+  // Disable the add to cart button if size value is "Unselected"
+  var atcButton = document.querySelector('.product-form__submit.button');
+  var observer = new MutationObserver(function(mutationsList) {
+    mutationsList.forEach(function(mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'disabled') {
+        var sizeElement = document.querySelector('select[name="options[Size]"]');
+        console.log('Button disabled attribute modified!');
 
-                // Make a POST request using the fetch API
-                fetch('/cart/add.js', {
-                  method: 'POST',
-                  headers: {
-                    'Content-Type': 'application/json'
-                  },
-                  body: JSON.stringify(data)
-                })
-                  .then(response => response.json())
-                  .then(data => {
-                    console.log('Item added to cart:', data);
-                  })
-                  .catch(error => {
-                    console.error('Error adding item to cart:', error);
-                  });
-              }
-            })
+        if (sizeElement.value === 'Unselected') {
+          observer.disconnect();
+          atcButton.disabled = true;
+          observer.observe(atcButton, { attributes: true });
+        } else {
+          atcButton.disabled = false;
         }
-      });
-      return response
-    }
-  }(window, window.fetch));
-
+      }
+    });
+  });
+  observer.observe(atcButton, { attributes: true });
 </script>
 {% schema %}
 {

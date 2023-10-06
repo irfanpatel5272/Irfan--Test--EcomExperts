@@ -334,5 +334,87 @@
     {%- if settings.predictive_search_enabled -%}
       <script src="{{ 'predictive-search.js' | asset_url }}" defer="defer"></script>
     {%- endif -%}
+
+    <script>
+      // Detect the add to cart and remove from cart event
+      (function (ns, fetch) {
+        ns.fetch = function() {
+          const response = fetch.apply(this, arguments);
+          response.then(res => {
+            if (`${window.location.origin}/cart/add.js`
+              .includes(res.url)) {
+                addedToCart(res.clone())
+            }
+            if (`${window.location.origin}/cart/change.js`
+              .includes(res.url)) {
+                removedFromCart(res.clone())
+            }
+          });
+          return response
+        }
+      }(window, window.fetch));
+
+      // Below function will remove the "Soft Winter Jacket" product if Handbag - Black/Medium removed
+      function removedFromCart(response) {
+        response.json().then(data => {
+          if(data.items_removed.length > 0 && data.items_removed[0].untranslated_variant_title == "Black / Medium") {
+            fetch('/cart/change.js', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify({
+                id: '41723456421935',
+                quantity: 0
+              }),
+            })
+            .then(response => response.json())
+            .then(data => {
+              // remove product without refresh the page
+              var element = document.querySelector('input[name="updates[]"]');
+              var clickEvent = new MouseEvent('change', {
+                bubbles: true,
+                cancelable: true,
+                view: window
+              });
+              element.dispatchEvent(clickEvent);
+              
+              // Uncomment below line to remove product with refresh the page
+              //location.reload()
+            })
+            .catch(error => {
+              console.error('Error removing item from cart:', error);
+            });
+          }
+        })
+      }
+      
+      // Below function will add the "Soft Winter Jacket" product if Handbag - Black/Medium added to cart
+      function addedToCart(response) {
+        response.json().then(data => {
+          if(data.variant_title == "Black / Medium") {
+            var data = {
+              quantity: 1,
+              id: 41723456421935,
+            };
+
+            fetch('/cart/add.js', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify(data)
+            })
+              .then(response => response.json())
+              .then(data => {
+                console.log('Item added to cart:', data);
+              })
+              .catch(error => {
+                console.error('Error adding item to cart:', error);
+              });
+          }
+        })
+      }
+    </script>
   </body>
 </html>
