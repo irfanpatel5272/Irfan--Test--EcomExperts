@@ -682,6 +682,50 @@
   </script>
 </section>
 
+<script>
+  // set size as Unselected on page load
+  document.addEventListener('DOMContentLoaded', function() {
+    document.querySelector('select[name="options[Size]"]').value = "Unselected";
+    var sizeRadioElement = document.querySelector('input[name="Size"][value="Unselected"]');
+    if (sizeRadioElement) {
+      sizeRadioElement.checked = true;
+      var clickEvent = new MouseEvent('change', {
+        bubbles: true,
+        cancelable: true,
+        view: window
+      });
+      sizeRadioElement.dispatchEvent(clickEvent);
+    }
+  });
+
+  // Update color(select) value of select on change of radio
+  var variantRadios = document.querySelectorAll('variant-radios input[name="Color"]');
+  variantRadios.forEach(function(radio) {
+    radio.addEventListener('change', function() {
+      document.querySelector('variant-selects select[name="options[Color]"]').value = radio.value
+    });
+  });
+
+  // Disable the add to cart button if size value is "Unselected"
+  var atcButton = document.querySelector('.product-form__submit.button');
+  var observer = new MutationObserver(function(mutationsList) {
+    mutationsList.forEach(function(mutation) {
+      if (mutation.type === 'attributes' && mutation.attributeName === 'disabled') {
+        var sizeElement = document.querySelector('select[name="options[Size]"]');
+        console.log('Button disabled attribute modified!');
+
+        if (sizeElement.value === 'Unselected') {
+          observer.disconnect();
+          atcButton.disabled = true;
+          observer.observe(atcButton, { attributes: true });
+        } else {
+          atcButton.disabled = false;
+        }
+      }
+    });
+  });
+  observer.observe(atcButton, { attributes: true });
+</script>
 {% schema %}
 {
   "name": "t:sections.main-product.name",
